@@ -1,0 +1,58 @@
+pragma solidity ^0.4.0;
+
+contract Voting{
+
+    struct Voters{
+
+        uint weight; //This allows owner to authorzie the voter
+        bool hasVoted;
+    }
+
+    struct Candidates{
+
+        string name;
+        uint voteCount;
+    }
+
+    //mapping to store address of the voter to use for authorization
+
+    mapping(address => Voters) voters;
+
+    Candidates[] public candidatesList;
+
+    address public owner;
+    //allows the list of initialized candidates and push to Candidates array
+    constructor(string _candidate1, string _candidate2, string _candidate3)public{
+
+     candidatesList.push(Candidates({name: _candidate1,voteCount: 0}));//Here we created an object
+     candidatesList.push(Candidates({name: _candidate2,voteCount: 0}));
+     candidatesList.push(Candidates({name: _candidate3,voteCount: 0}));
+
+    owner = msg.sender;
+
+    }
+
+
+    //Function to authorize the voter atuthorizeVoter() : Allow owner to authorize
+         function authorizeVoter(address _address)public{
+            require(msg.sender == owner);
+            require(!voters[_address].hasVoted);
+
+            voters[_address] = Voters({weight: 1, hasVoted:false});
+    }
+
+    function voterForCandidate(uint _index) public{
+
+        candidatesList[_index].voteCount = candidatesList[_index].voteCount + voters[msg.sender].weight;
+        if(voters[msg.sender].weight > 0){
+            voters[msg.sender].weight = 0;
+            voters[msg.sender].hasVoted = true;
+        }
+    }
+
+    function getVoteForCandidate(uint _index) public view returns(uint){
+
+        return candidatesList[_index].voteCount;
+
+    }
+}
